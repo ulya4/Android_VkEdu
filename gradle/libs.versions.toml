@@ -10,6 +10,10 @@ kotlin = "2.2.10"
 composeBom = "2026.02.01"
 
 [libraries]
+androidx-compose-foundation = { module = "androidx.compose.foundation:foundation" }
+androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version = "2.9.0" }
+coil-compose = { module = "io.coil-kt.coil3:coil-compose", version = "3.3.0" }
+coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version = "3.3.0" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
