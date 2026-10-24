@@ -12,6 +12,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,6 +28,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,6 +37,8 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             MyFirstAppTheme {
+                val appListViewModel: AppListViewModel = viewModel()
+                val apps = appListViewModel.apps
                 Scaffold { innerPadding ->
                     val navController = rememberNavController()
                     NavHost(
@@ -42,9 +47,12 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.padding(innerPadding)
                     ) {
                         composable("apps") {
-                            AppListScreen(onAppClick = { app ->
-                                navController.navigate("details/${apps.indexOf(app)}")
-                            })
+                            AppListScreen(
+                                viewModel = appListViewModel,
+                                onAppClick = { app ->
+                                    navController.navigate("details/${apps.indexOf(app)}")
+                                }
+                            )
                         }
                         composable(
                             route = "details/{index}",
@@ -68,43 +76,59 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun AppListScreen(
+    viewModel: AppListViewModel,
     onAppClick: (AppInfo) -> Unit,
     modifier: Modifier = Modifier
 ) {
 
-    Column(modifier = modifier.fillMaxSize()) {
+    val snackbarHostState = remember { SnackbarHostState() }
 
-        // Верхняя панель
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color(0xFF6750A4))
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Image(
-                painter = painterResource(
-                    R.drawable.ic_launcher_foreground
-                ),
-                contentDescription = "Иконка приложения",
-                modifier = Modifier.size(48.dp)
-            )
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            Text(
-                text = "Список приложений",
-                color = Color.White,
-                fontSize = 20.sp
-            )
+    LaunchedEffect(viewModel) {
+        viewModel.snackbarMessages.collect {
+            snackbarHostState.showSnackbar("Вы нажали на панель")
         }
+    }
 
-        // Вертикальный список
-        LazyColumn {
-            items(apps) { app ->
-                AppItem(app = app, onClick = { onAppClick(app) })
+    Scaffold(
+        modifier = modifier.fillMaxSize(),
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ) { innerPadding ->
+        Column(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
 
-                HorizontalDivider()
+            // Верхняя панель
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color(0xFF6750A4))
+                    .clickable(onClick = viewModel::onToolbarClick)
+                    .padding(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Image(
+                    painter = painterResource(
+                        R.drawable.ic_launcher_foreground
+                    ),
+                    contentDescription = "Иконка приложения",
+                    modifier = Modifier.size(48.dp)
+                )
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Text(
+                    text = "Список приложений",
+                    color = Color.White,
+                    fontSize = 20.sp
+                )
+            }
+
+            // Вертикальный список
+            LazyColumn {
+                items(viewModel.apps) { app ->
+                    AppItem(app = app, onClick = { onAppClick(app) })
+
+                    HorizontalDivider()
+                }
             }
         }
     }

@@ -8,7 +8,7 @@ data class AppInfo(
     val icon: Int
 )
 
-val apps = listOf(
+fun loadApps(): List<AppInfo> = listOf(
     AppInfo("Камера", "Фото и видео",
         "Мультимедиа", android.R.drawable.ic_menu_camera),
     AppInfo("Галерея", "Просмотр фотографий",
@@ -22,7 +22,7 @@ val apps = listOf(
 )
 
 // Девять приложений: по три на каждой странице витрины.
-val showcaseApps = apps + listOf(
+val showcaseApps = loadApps() + listOf(
     AppInfo("Календарь", "События и встречи", "Инструменты", android.R.drawable.ic_menu_month),
     AppInfo("Почта", "Электронные письма", "Связь", android.R.drawable.ic_dialog_email),
     AppInfo("Заметки", "Запись важных дел", "Инструменты", android.R.drawable.ic_menu_edit),
